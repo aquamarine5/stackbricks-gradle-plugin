@@ -1,0 +1,27 @@
+plugins {
+    id 'groovy'
+    id 'java-gradle-plugin'
+}
+
+group = 'org.aquamarine5.brainspark'
+version = '1.0'
+
+gradlePlugin{
+    plugins{
+        create("stackbricksPlugin"){
+            id = "org.aquamarine5.brainspark"
+            implementationClass = "org.aquamarine5.brainspark.StackbricksGradlePlugin"
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.qiniu:qiniu-java-sdk:7.16.+'
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+}
