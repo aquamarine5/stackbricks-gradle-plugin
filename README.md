@@ -1,1 +1,1 @@
-# org.aquamarine5.brainspark.StackbricksGradlePlugin
+# org.aquamarine5.brainspark.stackbricks.gradleplugin.StackbricksGradlePlugin

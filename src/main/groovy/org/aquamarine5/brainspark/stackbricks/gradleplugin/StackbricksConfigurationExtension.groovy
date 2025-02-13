@@ -1,4 +1,4 @@
-package org.aquamarine5.brainspark
+package org.aquamarine5.brainspark.stackbricks.gradleplugin
 
 import org.gradle.api.Action
 

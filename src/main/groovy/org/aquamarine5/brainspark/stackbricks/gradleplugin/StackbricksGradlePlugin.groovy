@@ -1,6 +1,6 @@
-package org.aquamarine5.brainspark
+package org.aquamarine5.brainspark.stackbricks.gradleplugin
 
-import com.alibaba.fastjson2.JSON
+
 import com.alibaba.fastjson2.JSONObject
 import com.qiniu.storage.Configuration
 import com.qiniu.storage.Region

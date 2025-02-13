@@ -1,4 +1,4 @@
-package org.aquamarine5.brainspark
+package org.aquamarine5.brainspark.stackbricks.gradleplugin
 
 class QiniuConfigurationExtension {
     String accessKey;
