@@ -6,9 +6,9 @@ plugins {
 group = 'org.aquamarine5.brainspark'
 version = '1.0'
 
-gradlePlugin{
-    plugins{
-        create("stackbricksPlugin"){
+gradlePlugin {
+    plugins {
+        create("stackbricksPlugin") {
             id = "org.aquamarine5.brainspark"
             implementationClass = "org.aquamarine5.brainspark.StackbricksGradlePlugin"
         }
@@ -16,10 +16,14 @@ gradlePlugin{
 }
 
 repositories {
+    maven { url 'https://maven.aliyun.com/repository/google' }
+    maven { url 'https://maven.aliyun.com/repository/public' }
     mavenCentral()
 }
 
 dependencies {
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.54'
+    implementation 'com.squareup.okio:okio:3.10.2'
     implementation 'com.qiniu:qiniu-java-sdk:7.16.+'
     implementation gradleApi()
     implementation localGroovy()
