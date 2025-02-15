@@ -92,19 +92,20 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         def url = new URI("http://${stackbricksConfig.host}/${stackbricksConfig.configJsonFilePath}").toURL()
         println url
         def configFile = project.layout.buildDirectory.file("stackbricks_config_v1.tmp.json").get().asFile
-        def okhttpClient=new OkHttpClient()
-        def requestBuilder=new Request.Builder().url(url).get()
-        if (stackbricksConfig.qiniuConfiguration.referer != null) {
+        def okhttpClient = new OkHttpClient()
+        def requestBuilder = new Request.Builder().url(url).get()
+        if (stackbricksConfig.qiniuConfiguration.referer != null
+                && stackbricksConfig.qiniuConfiguration.referer != "") {
             requestBuilder.addHeader("Referer", stackbricksConfig.qiniuConfiguration.referer)
         }
-        def request=requestBuilder.build()
-        def response=okhttpClient.newCall(request).execute()
+        def request = requestBuilder.build()
+        def response = okhttpClient.newCall(request).execute()
         println response.code()
         println response.message()
-        if(!response.successful){
+        if (!response.successful) {
             throw new RuntimeException("Failed to download the Stackbricks configuration file.")
         }
-        def str =response.body().string()
+        def str = response.body().string()
         println "previously: $str"
         def json = JSONObject.parseObject(str)
         def versionData = new StackbricksVersionData(versionCode, versionName, filename, new Date(), applicationId)
