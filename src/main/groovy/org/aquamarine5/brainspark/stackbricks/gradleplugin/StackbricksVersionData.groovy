@@ -1,9 +1,14 @@
 package org.aquamarine5.brainspark.stackbricks.gradleplugin
 
+/**
+ * StackbricksVersionData
+ *
+ * This class represents the version data for Stackbricks.
+ */
 class StackbricksVersionData {
     int versionCode;
     String versionName;
-    String downloadApkUrl;
+    String downloadUrl;
     Date releaseDate;
     String packageName
 
@@ -14,7 +19,7 @@ class StackbricksVersionData {
                            String packageName) {
         this.versionCode = versionCode;
         this.versionName = versionName;
-        this.downloadApkUrl = downloadApkUrl;
+        this.downloadUrl = downloadApkUrl;
         this.releaseDate = releaseDate;
         this.packageName = packageName;
     }

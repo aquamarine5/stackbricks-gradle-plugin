@@ -6,14 +6,14 @@ plugins {
 }
 
 group = 'org.aquamarine5.brainspark'
-version = '1.1'
+version = '1.6'
 
 gradlePlugin {
     website = "https://github.com/aquamarine5/stackbricks-gradle-plugin"
     vcsUrl = "https://github.com/aquamarine5/stackbricks-gradle-plugin"
     plugins {
         create("stackbricksPlugin") {
-            id = "org.aquamarine5.brainspark.stackbricks.gradleplugin"
+            id = "org.aquamarine5.brainspark.stackbricks-gradle-plugin"
             implementationClass = "org.aquamarine5.brainspark.stackbricks.gradleplugin.StackbricksGradlePlugin"
             displayName = "Stackbricks for Gradle Plugin"
             description= "Stackbricks for Gradle Plugin"
@@ -31,11 +31,6 @@ publishing {
                 username = "aquamarine5"
                 password = System.getenv("GHP_TOKEN")
             }
-        }
-    }
-    publications {
-        gpr(MavenPublication) {
-            from(components.java)
         }
     }
 }

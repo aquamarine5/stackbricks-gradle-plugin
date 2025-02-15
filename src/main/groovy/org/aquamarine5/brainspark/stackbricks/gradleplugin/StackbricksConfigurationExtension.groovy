@@ -4,9 +4,10 @@ import org.gradle.api.Action
 
 class StackbricksConfigurationExtension {
     String host;
-    String configJsonFilePath="stackbricks_config_v1.json";
-    QiniuConfigurationExtension qiniuConfiguration=new QiniuConfigurationExtension()
-    void qiniuConfig(Action<QiniuConfigurationExtension> action){
+    String configJsonFilePath = "stackbricks_config_v1.json";
+    QiniuConfigurationExtension qiniuConfiguration = new QiniuConfigurationExtension()
+
+    void qiniuConfig(Action<QiniuConfigurationExtension> action) {
         action.execute(qiniuConfiguration)
     }
 }
