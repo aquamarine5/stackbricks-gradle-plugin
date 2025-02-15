@@ -6,6 +6,8 @@ import com.qiniu.storage.Configuration
 import com.qiniu.storage.Region
 import com.qiniu.storage.UploadManager
 import com.qiniu.util.Auth
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okio.Okio
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -62,11 +64,13 @@ class StackbricksGradlePlugin implements Plugin<Project> {
      * @param filename the filename of the uploaded file, if null, the original filename will be used
      * @see QiniuConfigurationExtension
      */
-    static void uploadFileByQiniu(File file, QiniuConfigurationExtension qiniuConfig, String filename = null) {
+    static void uploadFileByQiniu(File file, QiniuConfigurationExtension qiniuConfig, String filename = null, Boolean overwrite = false) {
         def auth = Auth.create(qiniuConfig.accessKey, qiniuConfig.secretKey)
-        def uploadToken = auth.uploadToken(qiniuConfig.bucket)
+        def uploadToken =
+                overwrite ? auth.uploadToken(qiniuConfig.bucket, filename ?: file.name) : auth.uploadToken(qiniuConfig.bucket)
         println(uploadToken)
         def uploadConfig = new Configuration(Region.qvmHuabei())
+        uploadConfig.useHttpsDomains = false
         uploadConfig.resumableUploadAPIVersion = Configuration.ResumableUploadAPIVersion.V2
         def uploadManager = new UploadManager(uploadConfig)
         def fileToken = filename ?: file.name
@@ -86,15 +90,21 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         def versionName = project.android.defaultConfig.versionName as String
         def applicationId = project.android.defaultConfig.applicationId as String
         def url = new URI("http://${stackbricksConfig.host}/${stackbricksConfig.configJsonFilePath}").toURL()
+        println url
         def configFile = project.layout.buildDirectory.file("stackbricks_config_v1.tmp.json").get().asFile
-        def connection = url.openConnection()
-        if(stackbricksConfig.qiniuConfiguration.referer != null){
-            connection.addRequestProperty("Referer", stackbricksConfig.qiniuConfiguration.referer)
+        def okhttpClient=new OkHttpClient()
+        def requestBuilder=new Request.Builder().url(url).get()
+        if (stackbricksConfig.qiniuConfiguration.referer != null) {
+            requestBuilder.addHeader("Referer", stackbricksConfig.qiniuConfiguration.referer)
         }
-        def source = Okio.source(connection.getInputStream())
-        def sink = Okio.buffer(Okio.sink(configFile))
-        sink.writeAll(source)
-        def str = Files.readString(configFile.toPath(), StandardCharsets.UTF_8)
+        def request=requestBuilder.build()
+        def response=okhttpClient.newCall(request).execute()
+        println response.code()
+        println response.message()
+        if(!response.successful){
+            throw new RuntimeException("Failed to download the Stackbricks configuration file.")
+        }
+        def str =response.body().string()
         println "previously: $str"
         def json = JSONObject.parseObject(str)
         def versionData = new StackbricksVersionData(versionCode, versionName, filename, new Date(), applicationId)
@@ -102,9 +112,9 @@ class StackbricksGradlePlugin implements Plugin<Project> {
                 versionData
         )
         json.replace("latest", versionData)
-        def newStr=json.toJSONString()
+        def newStr = json.toJSONString()
         println "new: $newStr"
         Files.writeString(configFile.toPath(), newStr, StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING)
-        uploadFileByQiniu(configFile, stackbricksConfig.qiniuConfiguration, stackbricksConfig.configJsonFilePath)
+        uploadFileByQiniu(configFile, stackbricksConfig.qiniuConfiguration, stackbricksConfig.configJsonFilePath, true)
     }
 }
