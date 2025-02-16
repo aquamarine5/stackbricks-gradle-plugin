@@ -32,7 +32,7 @@ plugins {
 }
 ```
 > [!NOTE]
-> 目前最新版本为`1.11`，请将`$latest_sgp_version`替换为最新版本号，详见[此](https://github.com/aquamarine5/stackbricks-gradle-plugin/packages/2402628)。
+> 目前最新版本为`1.12`，请将`$latest_sgp_version`替换为最新版本号，详见[此](https://github.com/aquamarine5/stackbricks-gradle-plugin/packages/2402628)。
 
 
 ### 方法2
@@ -81,3 +81,24 @@ gradle uploadApkByQiniu
 - 运行`uploadApkByQiniu`命令后会自动执行`assembleRelease`命令，生成APK文件，并上传到七牛云，更新Stackbricks配置文件。
 > [!IMPORTANT]
 > 确保`build.gradle`正确配置了针对`buildTypes.release.signingConfig`的签名信息，避免生成`app-release-unsigned.apk`导致上传失败。
+
+## Stackbricks Config
+
+### v1(`stackbricks_config_v1.json`)
+
+```json
+{
+  "@version": 1,
+  "@type": "stackbricks-config",
+  "latest": <StackbricksVersionData>{
+    "versionCode": <int>,
+    "versionName": <string>,
+    "downloadUrl": <string>,
+    "releaseDate": <long as Instant>,
+    "packageName": <string>
+  },
+  "versions": [
+    <StackbricksVersionData>
+  ]
+}
+```

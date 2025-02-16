@@ -15,6 +15,7 @@ import org.gradle.api.Project
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
+import java.time.Instant
 
 /**
  * StackbricksGradlePlugin implements a Gradle plugin that provides tasks for uploading APK files (by {@link QiniuConfigurationExtension} or etc.)
@@ -108,7 +109,7 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         def str = response.body().string()
         println "previously: $str"
         def json = JSONObject.parseObject(str)
-        def versionData = new StackbricksVersionData(versionCode, versionName, filename, new Date(), applicationId)
+        def versionData = new StackbricksVersionData(versionCode, versionName, filename, System.currentTimeMillis(), applicationId)
         json.getJSONArray("versions").add(
                 versionData
         )
