@@ -1,5 +1,7 @@
 # stackbricks-gradle-plugin
+
 [![wakatime](https://wakatime.com/badge/github/aquamarine5/stackbricks-gradle-plugin.svg)](https://wakatime.com/badge/github/aquamarine5/stackbricks-gradle-plugin)
+
 ## 添加依赖
 
 ### 方法1（推荐）
@@ -9,7 +11,7 @@
 
 - 在项目根目录的`setting.gradle`文件中添加如下内容：
 ```groovy
-dependencyResolutionManagement{
+dependencyResolutionManagement {
     repositories {
         maven {
             url = uri("https://maven.pkg.github.com/aquamarine5/stackbricks-gradle-plugin")
@@ -31,9 +33,9 @@ plugins {
     id "org.aquamarine5.brainspark.stackbricks-gradle-plugin" version "$latest_sgp_version"
 }
 ```
+
 > [!NOTE]
 > 目前最新版本为`1.12`，请将`$latest_sgp_version`替换为最新版本号，详见[此](https://github.com/aquamarine5/stackbricks-gradle-plugin/packages/2402628)。
-
 
 ### 方法2
 
@@ -84,21 +86,21 @@ gradle uploadApkByQiniu
 
 ## Stackbricks Config
 
-### v1(`stackbricks_config_v1.json`)
+### v1 (`stackbricks_config_v1.json`)
 
 ```json
 {
   "@version": 1,
   "@type": "stackbricks-config",
-  "latest": <StackbricksVersionData>{
-    "versionCode": <int>,
-    "versionName": <string>,
-    "downloadUrl": <string>,
-    "releaseDate": <long as Instant>,
-    "packageName": <string>
+  "latest": {
+    "versionCode": "<int>",
+    "versionName": "<string>",
+    "downloadUrl": "<string>",
+    "releaseDate": "<long as Instant>",
+    "packageName": "<string>"
   },
   "versions": [
-    <StackbricksVersionData>
+    "<StackbricksVersionData>"
   ]
 }
 ```
