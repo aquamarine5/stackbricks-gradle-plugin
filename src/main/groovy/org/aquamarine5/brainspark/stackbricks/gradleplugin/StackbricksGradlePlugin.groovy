@@ -79,6 +79,11 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         println response.bodyString()
     }
 
+    static Boolean isStable(Project project) {
+        def versionName = project.android.defaultConfig.versionName as String
+        return !(versionName.contains("alpha") || versionName.contains("beta") || versionName.contains("rc"))
+    }
+
     /**
      * Updates the Stackbricks configuration with the new version data.
      *
@@ -90,9 +95,11 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         def versionCode = project.android.defaultConfig.versionCode as Integer
         def versionName = project.android.defaultConfig.versionName as String
         def applicationId = project.android.defaultConfig.applicationId as String
+        def isStable = isStable(project)
+        def forceInstall = stackbricksConfig.forceInstall
         def url = new URI("http://${stackbricksConfig.host}/${stackbricksConfig.configJsonFilePath}").toURL()
         println url
-        def configFile = project.layout.buildDirectory.file("stackbricks_config_v1.tmp.json").get().asFile
+        def configFile = project.layout.buildDirectory.file("stackbricks_manifest_v2.tmp.json").get().asFile
         def okhttpClient = new OkHttpClient()
         def requestBuilder = new Request.Builder().url(url).get()
         if (stackbricksConfig.qiniuConfiguration.referer != null
@@ -109,14 +116,22 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         def str = response.body().string()
         println "previously: $str"
         def json = JSONObject.parseObject(str)
-        def versionData = new StackbricksVersionData(versionCode, versionName, filename, System.currentTimeMillis(), applicationId)
-        json.getJSONArray("versions").add(
-                versionData
+        def versionData = new StackbricksVersionDataV2(
+                applicationId,
+                versionCode,
+                versionName,
+                filename,
+                Instant.now().toEpochMilli(),
+                stackbricksConfig.changelog,
+                forceInstall
         )
-        json.replace("latest", versionData)
+        if (isStable)
+            json.replace("latestStable", versionData)
+        else
+            json.replace("latestTest", versionData)
         def newStr = json.toJSONString()
         println "new: $newStr"
-        Files.writeString(configFile.toPath(), newStr, StandardCharsets.UTF_8,StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING)
+        Files.writeString(configFile.toPath(), newStr, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
         uploadFileByQiniu(configFile, stackbricksConfig.qiniuConfiguration, stackbricksConfig.configJsonFilePath, true)
     }
 }
