@@ -6,6 +6,8 @@ class StackbricksConfigurationExtension {
     String host;
     String configJsonFilePath = "stackbricks_config_v1.json";
     QiniuConfigurationExtension qiniuConfiguration = new QiniuConfigurationExtension()
+    String changelog = ""
+    Boolean forceInstall = false
 
     void qiniuConfig(Action<QiniuConfigurationExtension> action) {
         action.execute(qiniuConfiguration)
