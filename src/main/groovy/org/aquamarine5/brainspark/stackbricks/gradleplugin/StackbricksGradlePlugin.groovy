@@ -123,8 +123,7 @@ class StackbricksGradlePlugin implements Plugin<Project> {
                 filename,
                 Instant.now().toEpochMilli(),
                 stackbricksConfig.changelog,
-                forceInstall,
-                isStable
+                forceInstall
         )
         if (isStable)
             json.replace("latestStable", versionData)

@@ -9,11 +9,10 @@ class StackbricksVersionDataV2 {
     String packageName
     int versionCode
     String versionName
-    String downloadFilename
+    String downloadUrl
     Long releaseDate
     String changelog
     boolean forceInstall
-    boolean isStable
 
     StackbricksVersionDataV2(String packageName,
                              int versionCode,
@@ -21,15 +20,13 @@ class StackbricksVersionDataV2 {
                              String downloadFilename,
                              Long releaseDate,
                              String changelog,
-                             boolean forceInstall,
-                             boolean isStable) {
+                             boolean forceInstall) {
         this.packageName = packageName
         this.versionCode = versionCode
         this.versionName = versionName
-        this.downloadFilename = downloadFilename
+        this.downloadUrl = downloadFilename
         this.releaseDate = releaseDate
         this.changelog = changelog
         this.forceInstall = forceInstall
-        this.isStable = isStable
     }
 }
