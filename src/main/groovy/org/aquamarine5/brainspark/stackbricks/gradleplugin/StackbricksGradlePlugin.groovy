@@ -81,7 +81,7 @@ class StackbricksGradlePlugin implements Plugin<Project> {
 
     static Boolean isStable(Project project) {
         def versionName = project.android.defaultConfig.versionName as String
-        return versionName.contains("alpha") || versionName.contains("beta") || versionName.contains("rc")
+        return !(versionName.contains("alpha") || versionName.contains("beta") || versionName.contains("rc"))
     }
 
     /**
