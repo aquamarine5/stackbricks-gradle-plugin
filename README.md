@@ -35,9 +35,12 @@ plugins {
 ```
 
 > [!NOTE]
-> 目前最新版本为`1.12`，请将`$latest_sgp_version`替换为最新版本号，详见[此](https://github.com/aquamarine5/stackbricks-gradle-plugin/packages/2402628)。
+> 目前最新版本为`2.0.2`，请将`$latest_sgp_version`替换为最新版本号，详见[此](https://github.com/aquamarine5/stackbricks-gradle-plugin/packages/2402628)。
 
 ### 方法2
+
+> [!CAUTION]
+> 暂时不打算对Gradle Plugin Portal源进行支持，可用的版本已明显落后最新版本，请不再使用此方法添加。
 
 - 直接使用[Gradle Plugin Portal源](https://plugins.gradle.org/plugin/io.github.aquamarine5.stackbricks-gradle-plugin)
 - 在`setting.gradle`内，Gradle Plugin Portal源已默认启用（`gradlePluginPortal()`），无需再自行配置。
@@ -85,6 +88,30 @@ gradle uploadApkByQiniu
 > 确保`build.gradle`正确配置了针对`buildTypes.release.signingConfig`的签名信息，避免生成`app-release-unsigned.apk`导致上传失败。
 
 ## Stackbricks Config
+### v2 (`stackbricks_manifest_v2.json`)
+```json
+{
+    "manifestVersion": 2,
+    "latestStable": {
+        "changelog": "<string>",
+        "downloadUrl": "<string, only file_name>",
+        "forceInstall": "<boolean>",
+        "packageName": "<string>",
+        "releaseDate": "<long as Instant>",
+        "versionCode": "<int>",
+        "versionName": "<string>"
+    },
+    "latestTest": {
+        "changelog": "<string>",
+        "downloadUrl": "<string, only file_name>",
+        "forceInstall": "<boolean>",
+        "packageName": "<string>",
+        "releaseDate": "<long as Instant>",
+        "versionCode": "<int>",
+        "versionName": "<string>"
+    }
+}
+```
 
 ### v1 (`stackbricks_config_v1.json`)
 
