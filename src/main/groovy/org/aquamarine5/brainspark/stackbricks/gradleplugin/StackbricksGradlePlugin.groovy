@@ -8,7 +8,6 @@ import com.qiniu.storage.UploadManager
 import com.qiniu.util.Auth
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okio.Okio
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -116,14 +115,15 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         def str = response.body().string()
         println "previously: $str"
         def json = JSONObject.parseObject(str)
-        def versionData = new StackbricksVersionDataV2(
+        def versionData = new StackbricksVersionDataV3(
                 applicationId,
                 versionCode,
                 versionName,
                 filename,
                 Instant.now().toEpochMilli(),
                 stackbricksConfig.changelog,
-                forceInstall
+                forceInstall,
+                stackbricksConfig.forceInstallLessVersion
         )
         if (isStable)
             json.replace("latestStable", versionData)

@@ -5,22 +5,25 @@ package org.aquamarine5.brainspark.stackbricks.gradleplugin
  *
  * This class represents the newest version data for Stackbricks.
  */
-class StackbricksVersionDataV2 {
+class StackbricksVersionDataV3 {
     String packageName
     int versionCode
     String versionName
     String downloadUrl
     Long releaseDate
     String changelog
+    @Deprecated
     boolean forceInstall
+    int forceInstallLessVersion
 
-    StackbricksVersionDataV2(String packageName,
+    StackbricksVersionDataV3(String packageName,
                              int versionCode,
                              String versionName,
                              String downloadFilename,
                              Long releaseDate,
                              String changelog,
-                             boolean forceInstall) {
+                             boolean forceInstall,
+                             int forceInstallLessVersion) {
         this.packageName = packageName
         this.versionCode = versionCode
         this.versionName = versionName
@@ -28,5 +31,6 @@ class StackbricksVersionDataV2 {
         this.releaseDate = releaseDate
         this.changelog = changelog
         this.forceInstall = forceInstall
+        this.forceInstallLessVersion=forceInstallLessVersion
     }
 }
