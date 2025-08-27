@@ -88,6 +88,33 @@ gradle uploadApkByQiniu
 > 确保`build.gradle`正确配置了针对`buildTypes.release.signingConfig`的签名信息，避免生成`app-release-unsigned.apk`导致上传失败。
 
 ## Stackbricks Config
+### v2 (`stackbricks_manifest_v3.json`)
+```json
+{
+    "manifestVersion": 3,
+    "latestStable": {
+        "changelog": "<string>",
+        "downloadUrl": "<string, only file_name>",
+        "forceInstall": "<boolean, BUT DEPRECATED>",
+        "packageName": "<string>",
+        "releaseDate": "<long as Instant>",
+        "versionCode": "<int>",
+        "versionName": "<string>",
+        "forceInstallLessVersion": "<int>"
+    },
+    "latestTest": {
+        "changelog": "<string>",
+        "downloadUrl": "<string, only file_name>",
+        "forceInstall": "<boolean, BUT DEPRECATED>",
+        "packageName": "<string>",
+        "releaseDate": "<long as Instant>",
+        "versionCode": "<int>",
+        "versionName": "<string>",
+        "forceInstallLessVersion": "<int>"
+    }
+}
+```
+
 ### v2 (`stackbricks_manifest_v2.json`)
 ```json
 {
