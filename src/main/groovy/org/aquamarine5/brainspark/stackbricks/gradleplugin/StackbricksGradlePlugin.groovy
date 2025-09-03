@@ -95,7 +95,7 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         def versionName = project.android.defaultConfig.versionName as String
         def applicationId = project.android.defaultConfig.applicationId as String
         def isStable = isStable(project)
-        def forceInstall = stackbricksConfig.forceInstall
+        def forceInstall = stackbricksConfig.requiredManifestVersion2MigrateForceInstall
         def url = new URI("http://${stackbricksConfig.host}/${stackbricksConfig.configJsonFilePath}").toURL()
         println url
         def configFile = project.layout.buildDirectory.file("stackbricks_manifest_v2.tmp.json").get().asFile

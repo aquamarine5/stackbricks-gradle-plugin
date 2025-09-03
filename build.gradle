@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'org.aquamarine5.brainspark'
-version = '2.1.0'
+version = '2.1.1'
 
 gradlePlugin {
     website = "https://github.com/aquamarine5/stackbricks-gradle-plugin"

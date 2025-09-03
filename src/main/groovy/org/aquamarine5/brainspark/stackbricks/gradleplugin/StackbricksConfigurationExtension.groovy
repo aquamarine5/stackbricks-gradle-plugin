@@ -9,6 +9,8 @@ class StackbricksConfigurationExtension {
     String changelog = ""
     @Deprecated
     Boolean forceInstall = false
+
+    Boolean requiredManifestVersion2MigrateForceInstall = true
     int forceInstallLessVersion=-1
 
     void qiniuConfig(Action<QiniuConfigurationExtension> action) {
