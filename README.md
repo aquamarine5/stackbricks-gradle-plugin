@@ -35,7 +35,7 @@ plugins {
 ```
 
 > [!NOTE]
-> 目前最新版本为`2.0.2`，请将`$latest_sgp_version`替换为最新版本号，详见[此](https://github.com/aquamarine5/stackbricks-gradle-plugin/packages/2402628)。
+> 目前最新版本为`2.1.1`，请将`$latest_sgp_version`替换为最新版本号，详见[此](https://github.com/aquamarine5/stackbricks-gradle-plugin/packages/2402628)。
 
 ### 方法2
 
