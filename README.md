@@ -37,7 +37,7 @@ plugins {
 > [!NOTE]
 > 目前最新版本为`2.1.1`，请将`$latest_sgp_version`替换为最新版本号，详见[此](https://github.com/aquamarine5/stackbricks-gradle-plugin/packages/2402628)。
 
-### 方法2
+### <del>方法2</del>
 
 > [!CAUTION]
 > 暂时不打算对Gradle Plugin Portal源进行支持，可用的版本已明显落后最新版本，请不再使用此方法添加。
@@ -50,6 +50,8 @@ plugins {
     id "io.github.aquamarine5.stackbricks-gradle-plugin" version "$latest_sgp_version"
 }
 ```
+
+
 > [!NOTE]
 > 目前最新版本为`1.2`，此源的更新速度会略慢于Gradle源，使用时请将`$latest_sgp_version`替换为最新版本号，详见[此](https://plugins.gradle.org/plugin/io.github.aquamarine5.stackbricks-gradle-plugin)。
 
@@ -62,7 +64,8 @@ plugins {
 ```groovy
 stackbricksConfig {
     host = "$cdn_host"
-    configJsonFilePath = "stackbricks_config_v1.json"
+    configJsonFilePath = "stackbricks_manifest_v3.json"
+    changelog = "lovely lonely"
     qiniuConfig {
         accessKey = project.findProperty("qiniu.accessKey")
         secretKey = project.findProperty("qiniu.secretKey")
@@ -88,14 +91,14 @@ gradle uploadApkByQiniu
 > 确保`build.gradle`正确配置了针对`buildTypes.release.signingConfig`的签名信息，避免生成`app-release-unsigned.apk`导致上传失败。
 
 ## Stackbricks Config
-### v2 (`stackbricks_manifest_v3.json`)
+### v3 (`stackbricks_manifest_v3.json`)
 ```json
 {
     "manifestVersion": 3,
     "latestStable": {
         "changelog": "<string>",
         "downloadUrl": "<string, only file_name>",
-        "forceInstall": "<boolean, BUT DEPRECATED>",
+        "forceInstall": "<boolean, BUT DEPRECATED, USE forceInstallLessVersion FIELD>",
         "packageName": "<string>",
         "releaseDate": "<long as Instant>",
         "versionCode": "<int>",
@@ -105,7 +108,7 @@ gradle uploadApkByQiniu
     "latestTest": {
         "changelog": "<string>",
         "downloadUrl": "<string, only file_name>",
-        "forceInstall": "<boolean, BUT DEPRECATED>",
+        "forceInstall": "<boolean, BUT DEPRECATED, USE forceInstallLessVersion FIELD>",
         "packageName": "<string>",
         "releaseDate": "<long as Instant>",
         "versionCode": "<int>",
