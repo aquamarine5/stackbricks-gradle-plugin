@@ -125,10 +125,9 @@ class StackbricksGradlePlugin implements Plugin<Project> {
                 forceInstall,
                 stackbricksConfig.forceInstallLessVersion
         )
+        json.replace("latestTest", versionData)
         if (isStable)
             json.replace("latestStable", versionData)
-        else
-            json.replace("latestTest", versionData)
         def newStr = json.toJSONString()
         println "new: $newStr"
         Files.writeString(configFile.toPath(), newStr, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
