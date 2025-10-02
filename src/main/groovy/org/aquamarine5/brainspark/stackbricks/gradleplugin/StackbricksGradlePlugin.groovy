@@ -133,7 +133,7 @@ class StackbricksGradlePlugin implements Plugin<Project> {
                 def newStr = json.toJSONString()
                 println "new: $newStr"
                 Files.writeString(configFile.toPath(), newStr, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
-                uploadFileByQiniu(configFile, stackbricksConfig.qiniuConfiguration, stackbricksConfig.configJsonFilePath, true)
+                uploadFileByQiniu(configFile, stackbricksConfig.qiniuConfiguration, it.configFilePath, true)
             } catch (Exception e) {
                 e.printStackTrace()
             }
