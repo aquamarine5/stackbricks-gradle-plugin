@@ -69,7 +69,7 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         def uploadToken =
                 overwrite ? auth.uploadToken(qiniuConfig.bucket, filename ?: file.name) : auth.uploadToken(qiniuConfig.bucket)
         println(uploadToken)
-        def uploadConfig = new Configuration(Region.qvmHuabei())
+        def uploadConfig = Configuration.create(Region.qvmHuabei())
         uploadConfig.useHttpsDomains = false
         uploadConfig.resumableUploadAPIVersion = Configuration.ResumableUploadAPIVersion.V2
         def uploadManager = new UploadManager(uploadConfig)
@@ -95,26 +95,8 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         def versionName = project.android.defaultConfig.versionName as String
         def applicationId = project.android.defaultConfig.applicationId as String
         def isStable = isStable(project)
-        def forceInstall = stackbricksConfig.requiredManifestVersion2MigrateForceInstall
-        def url = new URI("http://${stackbricksConfig.host}/${stackbricksConfig.configJsonFilePath}").toURL()
-        println url
-        def configFile = project.layout.buildDirectory.file("stackbricks_manifest_v2.tmp.json").get().asFile
         def okhttpClient = new OkHttpClient()
-        def requestBuilder = new Request.Builder().url(url).get()
-        if (stackbricksConfig.qiniuConfiguration.referer != null
-                && stackbricksConfig.qiniuConfiguration.referer != "") {
-            requestBuilder.addHeader("Referer", stackbricksConfig.qiniuConfiguration.referer)
-        }
-        def request = requestBuilder.build()
-        def response = okhttpClient.newCall(request).execute()
-        println response.code()
-        println response.message()
-        if (!response.successful) {
-            throw new RuntimeException("Failed to download the Stackbricks configuration file.")
-        }
-        def str = response.body().string()
-        println "previously: $str"
-        def json = JSONObject.parseObject(str)
+        def forceInstall = stackbricksConfig.requiredManifestVersion2MigrateForceInstall
         def versionData = new StackbricksVersionDataV3(
                 applicationId,
                 versionCode,
@@ -125,12 +107,36 @@ class StackbricksGradlePlugin implements Plugin<Project> {
                 forceInstall,
                 stackbricksConfig.forceInstallLessVersion
         )
-        json.replace("latestTest", versionData)
-        if (isStable)
-            json.replace("latestStable", versionData)
-        def newStr = json.toJSONString()
-        println "new: $newStr"
-        Files.writeString(configFile.toPath(), newStr, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
-        uploadFileByQiniu(configFile, stackbricksConfig.qiniuConfiguration, stackbricksConfig.configJsonFilePath, true)
+        stackbricksConfig.possibleConfigurationPaths.each {
+            try {
+                def url = new URI(it.isHttps ? "https" : "http" + "://${it.host}/${it.configFilePath}").toURL()
+                println url
+                def configFile = project.layout.buildDirectory.file("stackbricks_manifest_v2.tmp.json").get().asFile
+                def requestBuilder = new Request.Builder().url(url).get()
+                if (stackbricksConfig.qiniuConfiguration.referer != null
+                        && stackbricksConfig.qiniuConfiguration.referer != "") {
+                    requestBuilder.addHeader("Referer", stackbricksConfig.qiniuConfiguration.referer)
+                }
+                def request = requestBuilder.build()
+                def response = okhttpClient.newCall(request).execute()
+                println response.code()
+                println response.message()
+                if (!response.successful) {
+                    throw new RuntimeException("Failed to download the Stackbricks configuration file.")
+                }
+                def str = response.body().string()
+                println "previously: $str"
+                def json = JSONObject.parseObject(str)
+                json.replace("latestTest", versionData)
+                if (isStable)
+                    json.replace("latestStable", versionData)
+                def newStr = json.toJSONString()
+                println "new: $newStr"
+                Files.writeString(configFile.toPath(), newStr, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+                uploadFileByQiniu(configFile, stackbricksConfig.qiniuConfiguration, stackbricksConfig.configJsonFilePath, true)
+            } catch (Exception e) {
+                e.printStackTrace()
+            }
+        }
     }
 }

@@ -31,6 +31,6 @@ class StackbricksVersionDataV3 {
         this.releaseDate = releaseDate
         this.changelog = changelog
         this.forceInstall = forceInstall
-        this.forceInstallLessVersion=forceInstallLessVersion
+        this.forceInstallLessVersion = forceInstallLessVersion
     }
 }
