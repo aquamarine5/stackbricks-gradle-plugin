@@ -14,7 +14,7 @@ class StackbricksVersionDataV3 {
     String changelog
     @Deprecated
     boolean forceInstall
-    int forceInstallLessVersion
+    long forceInstallLessVersion
 
     StackbricksVersionDataV3(String packageName,
                              int versionCode,
@@ -23,7 +23,7 @@ class StackbricksVersionDataV3 {
                              Long releaseDate,
                              String changelog,
                              boolean forceInstall,
-                             int forceInstallLessVersion) {
+                             long forceInstallLessVersion) {
         this.packageName = packageName
         this.versionCode = versionCode
         this.versionName = versionName

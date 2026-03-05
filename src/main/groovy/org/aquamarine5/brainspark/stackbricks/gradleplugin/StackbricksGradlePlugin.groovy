@@ -94,6 +94,7 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         def versionCode = project.android.defaultConfig.versionCode as Integer
         def versionName = project.android.defaultConfig.versionName as String
         def applicationId = project.android.defaultConfig.applicationId as String
+        
         def isStable = isStable(project)
         def okhttpClient = new OkHttpClient()
         def forceInstall = stackbricksConfig.requiredManifestVersion2MigrateForceInstall
@@ -109,7 +110,7 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         )
         stackbricksConfig.possibleConfigurationPaths.each {
             try {
-                def url = new URI(it.isHttps ? "https" : "http" + "://${it.host}/${it.configFilePath}").toURL()
+                def url = new URI((it.isHttps ? "https" : "http") + "://${it.host}/${it.configFilePath}").toURL()
                 println url
                 def configFile = project.layout.buildDirectory.file("stackbricks_manifest_v2.tmp.json").get().asFile
                 def requestBuilder = new Request.Builder().url(url).get()

@@ -17,7 +17,7 @@ class StackbricksConfigurationExtension {
     Boolean forceInstall = false
 
     Boolean requiredManifestVersion2MigrateForceInstall = true
-    int forceInstallLessVersion = -1
+    long forceInstallLessVersion = -1
 
     void qiniuConfig(Action<QiniuConfigurationExtension> action) {
         action.execute(qiniuConfiguration)
