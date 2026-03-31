@@ -21,6 +21,8 @@ import java.time.Instant
  * and updating the Stackbricks configuration.
  */
 class StackbricksGradlePlugin implements Plugin<Project> {
+    final LATEST_MANIFEST_VERSION = 3
+
     @Override
     void apply(Project project) {
         project.extensions.create("stackbricksConfig", StackbricksConfigurationExtension)
@@ -94,10 +96,9 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         def versionCode = project.android.defaultConfig.versionCode as Integer
         def versionName = project.android.defaultConfig.versionName as String
         def applicationId = project.android.defaultConfig.applicationId as String
-        
+
         def isStable = isStable(project)
         def okhttpClient = new OkHttpClient()
-        def forceInstall = stackbricksConfig.requiredManifestVersion2MigrateForceInstall
         def versionData = new StackbricksVersionDataV3(
                 applicationId,
                 versionCode,
@@ -105,14 +106,14 @@ class StackbricksGradlePlugin implements Plugin<Project> {
                 filename,
                 Instant.now().toEpochMilli(),
                 stackbricksConfig.changelog,
-                forceInstall,
+                stackbricksConfig.requiredManifestVersion2MigrateForceInstall,
                 stackbricksConfig.forceInstallLessVersion
         )
         stackbricksConfig.possibleConfigurationPaths.each {
             try {
                 def url = new URI((it.isHttps ? "https" : "http") + "://${it.host}/${it.configFilePath}").toURL()
                 println url
-                def configFile = project.layout.buildDirectory.file("stackbricks_manifest_v2.tmp.json").get().asFile
+                def configFile = project.layout.buildDirectory.file("stackbricks_manifest.tmp.json").get().asFile
                 def requestBuilder = new Request.Builder().url(url).get()
                 if (stackbricksConfig.qiniuConfiguration.referer != null
                         && stackbricksConfig.qiniuConfiguration.referer != "") {
@@ -131,6 +132,7 @@ class StackbricksGradlePlugin implements Plugin<Project> {
                 json.replace("latestTest", versionData)
                 if (isStable)
                     json.replace("latestStable", versionData)
+                json.replace("manifestVersion", LATEST_MANIFEST_VERSION)
                 def newStr = json.toJSONString()
                 println "new: $newStr"
                 Files.writeString(configFile.toPath(), newStr, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
