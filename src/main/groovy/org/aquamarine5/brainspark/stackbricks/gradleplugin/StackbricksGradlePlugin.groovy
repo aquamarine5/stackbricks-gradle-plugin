@@ -21,7 +21,8 @@ import java.time.Instant
  * and updating the Stackbricks configuration.
  */
 class StackbricksGradlePlugin implements Plugin<Project> {
-    final LATEST_MANIFEST_VERSION = 3
+    private static final int LATEST_MANIFEST_VERSION = 3
+
 
     @Override
     void apply(Project project) {
