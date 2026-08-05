@@ -23,7 +23,6 @@ import java.time.Instant
 class StackbricksGradlePlugin implements Plugin<Project> {
     private static final int LATEST_MANIFEST_VERSION = 3
 
-
     @Override
     void apply(Project project) {
         project.extensions.create("stackbricksConfig", StackbricksConfigurationExtension)
@@ -125,7 +124,7 @@ class StackbricksGradlePlugin implements Plugin<Project> {
                 println response.code()
                 println response.message()
                 if (!response.successful) {
-                    throw new RuntimeException("Failed to download the Stackbricks configuration file.")
+                    throw new RuntimeException("Failed to download the previous Stackbricks configuration file.")
                 }
                 def str = response.body().string()
                 println "previously: $str"
