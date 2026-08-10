@@ -123,20 +123,29 @@ class StackbricksGradlePlugin implements Plugin<Project> {
                 def response = okhttpClient.newCall(request).execute()
                 println response.code()
                 println response.message()
-                if (!response.successful) {
+                if (response.code() == 404) {
+                    println "No previous Stackbricks configuration is found. Use default configuration template."
+                    def defaultJsonObject = new JSONObject()
+                            .fluentPut("manifestVersion", LATEST_MANIFEST_VERSION)
+                            .fluentPut("latestTest", versionData)
+                            .fluentPut("latestStable", versionData)
+                    Files.writeString(configFile.toPath(), defaultJsonObject.toJSONString(), StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+                    uploadFileByQiniu(configFile, stackbricksConfig.qiniuConfiguration, it.configFilePath, true)
+                } else if (!response.successful) {
                     throw new RuntimeException("Failed to download the previous Stackbricks configuration file.")
+                } else {
+                    def str = response.body().string()
+                    println "previously: $str"
+                    def json = JSONObject.parseObject(str)
+                    json.replace("latestTest", versionData)
+                    if (isStable)
+                        json.replace("latestStable", versionData)
+                    json.replace("manifestVersion", LATEST_MANIFEST_VERSION)
+                    def newStr = json.toJSONString()
+                    println "new: $newStr"
+                    Files.writeString(configFile.toPath(), newStr, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+                    uploadFileByQiniu(configFile, stackbricksConfig.qiniuConfiguration, it.configFilePath, true)
                 }
-                def str = response.body().string()
-                println "previously: $str"
-                def json = JSONObject.parseObject(str)
-                json.replace("latestTest", versionData)
-                if (isStable)
-                    json.replace("latestStable", versionData)
-                json.replace("manifestVersion", LATEST_MANIFEST_VERSION)
-                def newStr = json.toJSONString()
-                println "new: $newStr"
-                Files.writeString(configFile.toPath(), newStr, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
-                uploadFileByQiniu(configFile, stackbricksConfig.qiniuConfiguration, it.configFilePath, true)
             } catch (Exception e) {
                 e.printStackTrace()
             }
