@@ -46,6 +46,7 @@ dependencies {
     implementation 'com.alibaba.fastjson2:fastjson2:2.0.63'
     implementation 'com.squareup.okio:okio:3.18.1'
     implementation 'com.qiniu:qiniu-java-sdk:7.19.0'
+    implementation 'software.amazon.awssdk:s3:2.56.0'
     implementation gradleApi()
     implementation localGroovy()
 }
