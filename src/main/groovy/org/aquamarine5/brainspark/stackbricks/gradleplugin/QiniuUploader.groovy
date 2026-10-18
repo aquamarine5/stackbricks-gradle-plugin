@@ -36,7 +36,7 @@ class QiniuUploader implements StackbricksUploader {
         def uploadManager = new UploadManager(uploadConfig)
         def response = uploadManager.put(file.path, objectKey, uploadToken)
         try {
-            println "[${TAG}] ${response.code} uploading ${file.name} as ${objectKey}: ${response.bodyString()}"
+            println "[${TAG}] ${response.statusCode} uploading ${file.name} as ${objectKey}: ${response.bodyString()}"
         } finally {
             response.close()
         }

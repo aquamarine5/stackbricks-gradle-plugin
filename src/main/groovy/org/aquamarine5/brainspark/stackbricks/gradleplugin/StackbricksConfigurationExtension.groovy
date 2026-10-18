@@ -9,7 +9,7 @@ class StackbricksConfigurationExtension {
     @Deprecated
     List<PossibleConfigurationPath> possibleConfigurationPaths = new ArrayList<>()
 
-    List<StackbricksUploadConfig> uploadDestinationConfiguration = new ArrayList<>()
+    List<StackbricksUploadConfig> uploadDestinationConfigurations = new ArrayList<>()
 
     List<StackbricksManifestConfig> manifestDestinationConfigurations = new ArrayList<>()
 
@@ -31,10 +31,10 @@ class StackbricksConfigurationExtension {
     Boolean requiredManifestVersion2MigrateForceInstall = true
     long forceInstallLessVersion = -1
 
-    void uploadDestinationConfiguration(Closure closure) {
+    void uploadDestinationConfigurations(Closure closure) {
         def builder = new StackbricksUploadDestinationConfiguration()
         StackbricksDsl.configure(builder, closure)
-        uploadDestinationConfiguration.addAll(builder.configs)
+        uploadDestinationConfigurations.addAll(builder.configs)
     }
 
     void manifestDestinationConfigurations(Closure closure) {
@@ -46,13 +46,13 @@ class StackbricksConfigurationExtension {
     void qiniuUploadConfig(Closure closure) {
         def config = new QiniuUploadConfig()
         StackbricksDsl.configure(config, closure)
-        uploadDestinationConfiguration.add(config)
+        uploadDestinationConfigurations.add(config)
     }
 
     void cloudflareUploadConfig(Closure closure) {
         def config = new CloudflareUploadConfig()
         StackbricksDsl.configure(config, closure)
-        uploadDestinationConfiguration.add(config)
+        uploadDestinationConfigurations.add(config)
     }
 
     void qiniuManifestConfig(Closure closure) {
@@ -68,8 +68,8 @@ class StackbricksConfigurationExtension {
     }
 
     List<StackbricksUploadConfig> resolveUploadDestinations() {
-        if (!uploadDestinationConfiguration.isEmpty()) {
-            return uploadDestinationConfiguration
+        if (!uploadDestinationConfigurations.isEmpty()) {
+            return uploadDestinationConfigurations
         }
         if (legacyQiniuConfigured || qiniuConfiguration.accessKey != null) {
             def legacyFirst = legacyFirstPossibleConfigurationPath()

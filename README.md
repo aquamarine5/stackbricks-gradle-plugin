@@ -35,7 +35,9 @@ plugins {
 ```
 
 > [!NOTE]
-> 目前最新版本为`2.2.9`，请将`$latest_sgp_version`替换为最新版本号，详见[此](https://github.com/aquamarine5/stackbricks-gradle-plugin/packages/2402628)。
+> 目前最新版本为`3.0.0-rc1`，请将`$latest_sgp_version`替换为最新版本号，详见[此](https://github.com/aquamarine5/stackbricks-gradle-plugin/packages/2402628)。
+>
+> **v4清单相关配置（`uploadDestinationConfigurations`、`manifestDestinationConfigurations`）需要3.0.0-rc1及以上。**
 
 ### <del>方法2</del>
 
@@ -61,18 +63,15 @@ plugins {
 ## 使用
 
 - 目前`stackbricks-gradle-plugin`以及配套[Stackbricks](https://github.com/aquamarine5/Stackbricks)支持七牛云CDN和Cloudflare R2。
+- `uploadDestinationConfigurations`声明APK上传到哪里，`manifestDestinationConfigurations`声明清单JSON写到哪里，两者独立配置。
 - 在`build.gradle`文件加入以下配置信息：
 ```groovy
 stackbricksConfig {
-    possibleConfigurationPaths = [
-            new PossibleConfigurationPath("cdn2.example.com", "stackbricks_manifest_v4.json", true),
-            new PossibleConfigurationPath("cdn.example.com", "stackbricks_manifest_v4.json", true),
-            // ... and more, tried in order
-    ]
     changelog = "lovely lonely"
     forceInstallLessVersion = 2006_12_15
     requiredManifestVersion2MigrateForceInstall = true
-    uploadDestinationConfiguration {
+
+    uploadDestinationConfigurations {
         cloudflareUploadConfig {
             host = "cdn2.example.com"
             accountId = project.findProperty("cloudflare.accountId")
@@ -82,20 +81,63 @@ stackbricksConfig {
         }
         qiniuUploadConfig {
             host = "cdn.example.com"
+            isHttps = false
             accessKey = project.findProperty("qiniu.accessKey")
             secretKey = project.findProperty("qiniu.secretKey")
             bucket = project.findProperty("qiniu.bucket")
             referer = project.findProperty("qiniu.referer") ?: ""
         }
     }
+
+    manifestDestinationConfigurations {
+        cloudflareManifestConfig {
+            host = "cdn2.example.com"
+            configFilePath = "stackbricks_manifest_v4.json"
+        }
+        qiniuManifestConfig {
+            host = "cdn.example.com"
+            isHttps = false
+            configFilePath = "stackbricks_manifest_v4.json"
+            referer = project.findProperty("qiniu.referer") ?: ""
+        }
+    }
 }
 ```
 
-- 每个`uploadDestinationConfiguration`块声明一个上传目标，块之间可以任意组合，**声明顺序即上传顺序**。
-  APK和清单文件会上传到每一个目标，清单中的`possibleDownloadPath`按同样的顺序生成，
+#### `uploadDestinationConfigurations`
+
+- 每个块声明一个APK上传目标，块之间可以任意组合，**声明顺序即上传顺序**。
+  APK会上传到每一个目标，清单中的`possibleDownloadPath`按同样的顺序生成，
   Android端会依次尝试，第一个匹配到可用`StackbricksPackageProvider`的路径胜出，因此把更可靠的源写在前面。
 - `host`值不需要`http(s)://`前缀，它是该目标对外提供下载的域名（R2需要绑定自定义域名或r2.dev）。
-  Cloudflare R2的bucket必须是**公开可读**的，插件只写入、读取都走公网地址，凭证不会进入APK。
+- `cloudflareUploadConfig`：`accountId` / `bucketName` / `accessKeyId` / `secretAccessKey`。
+  bucket必须**公开可读**，插件只写入、清单读取也走公网地址，凭证不会进入APK。
+- `qiniuUploadConfig`：`isHttps`默认为`false`（与旧版`PossibleConfigurationPath`一致）。
+  该值会写进清单的`additionalInformation.isHttps`，新版Stackbricks优先采用清单里的值，
+  旧版Stackbricks忽略该字段、仍使用App侧`QiniuConfiguration.isHttps`。`CloudflareUploadConfig`固定为`https`。
+
+#### `manifestDestinationConfigurations`
+
+- 每个块声明清单JSON的写入位置。插件会按顺序尝试读取，任一位置读到的清单都会作为合并基础（取第一个成功的），
+  写回时则**每个位置都写一份**，因此每个源都能独立提供清单。
+- `host` + `configFilePath` + `isHttps` + `referer`。
+- 块的`authority`由类型决定（七牛块→七牛，Cloudflare块→Cloudflare），
+  它必须能在`uploadDestinationConfigurations`里找到同authority的上传目标，否则构建会直接报错。
+- 建议App侧的`CloudflareConfiguration` / `QiniuConfiguration`的`possibleConfigurations`
+  按相同顺序和相同的`host to objectKey`填写，作为读取镜像：
+
+```kotlin
+val cloudflareConfiguration = CloudflareConfiguration(
+    possibleConfigurations = listOf("cdn2.example.com" to "stackbricks_manifest_v4.json"),
+    defaultBaseUrl = "https://cdn2.example.com"
+)
+val qiniuConfiguration = QiniuConfiguration(
+    possibleConfigurations = listOf("cdn.example.com" to "stackbricks_manifest_v4.json")
+)
+```
+
+#### 其他
+
 - `requiredManifestVersion2MigrateForceInstall: Boolean`  
   用于标识在更新V2版本清单文件时已被弃用的`forceInstall`的值。由于`forceInstall`已经在新版本V3清单文件中被弃用，
 并使用`forceInstallLessVersion`替代。若此值为`true`，则表明在更新清单文件的同时，将`forceInstall`值设置为`true`，
@@ -107,9 +149,20 @@ stackbricksConfig {
 
 ### 迁移
 
-`qiniuConfig { }` 和 `qiniuConfiguration` 已弃用，改用 `uploadDestinationConfiguration { qiniuUploadConfig { } }`。
-未配置新字段时插件仍会把旧的 `qiniuConfiguration` 迁移成一个七牛目标（host取自 `possibleConfigurationPaths` 的第一项），
-所以旧脚本无需立刻修改，但建议尽快迁移。
+| 弃用项 | 替代 |
+|---|---|
+| `qiniuConfig { }` / `qiniuConfiguration` | `uploadDestinationConfigurations { qiniuUploadConfig { } }` |
+| `possibleConfigurationPaths` | `manifestDestinationConfigurations { }` |
+| `uploadApkByQiniu` | `uploadApk` |
+
+未配置新字段时插件仍会把旧的`qiniuConfiguration`迁移成一个七牛上传目标，
+把旧的`possibleConfigurationPaths`迁移成七牛清单目标（`host`、`configFilePath`、`isHttps`逐项保留，并沿用旧`qiniuConfiguration.referer`），
+所以旧脚本无需立刻修改。
+
+> [!WARNING]
+> 迁移时若新增了`uploadDestinationConfigurations { cloudflareUploadConfig { } }`却忘记删除`possibleConfigurationPaths`，
+> 清单目标会固定迁移成七牛，而七牛上传目标不存在，构建会直接报错并提示该问题。
+> 请把旧字段一并删掉。
 
 ## 发布
 
@@ -134,6 +187,7 @@ gradle uploadApk
     "manifestVersion": 4,
     "latestStable": {
         "changelog": "<string>",
+        "downloadUrl": "<string, only file_name, 仅当存在七牛路径时才会出现>",
         "possibleDownloadPath": [
             {
                 "filename": "<string, the object key / file name>",
@@ -148,7 +202,8 @@ gradle uploadApk
                 "filename": "<string, the object key / file name>",
                 "authority": "org.aquamarine5.brainspark.stackbricks.downloadpath.qiniu",
                 "additionalInformation": {
-                    "host": "<string, qiniu cdn host, overrides the host in QiniuConfiguration>"
+                    "host": "<string, qiniu cdn host, overrides the host in QiniuConfiguration>",
+                    "isHttps": "<boolean, overrides the isHttps in QiniuConfiguration>"
                 }
             }
         ],
@@ -163,15 +218,23 @@ gradle uploadApk
 }
 ```
 
-`possibleDownloadPath`按顺序尝试，Android端选择第一个自身已注册了对应`StackbricksPackageProvider`的条目。
+- `possibleDownloadPath`按顺序尝试，Android端选择第一个自身已注册了对应`StackbricksPackageProvider`的条目。
+- **`downloadUrl`是兼容字段，请勿手工删除。** 它取自`possibleDownloadPath`里的第一条七牛路径，
+  供尚未支持`possibleDownloadPath`的旧版Stackbricks读取。没有七牛源时该字段不会出现在JSON里。
+
+> [!IMPORTANT]
+> 手工编写v4清单时最容易漏掉`downloadUrl`。漏掉不会让旧版应用崩溃，
+> 但旧版`QiniuMessageProvider`读到的会是`null`，进而拼出形如`https://你的CDN/null`的地址导致更新静默失败。
+> 建议始终由`gradle uploadApk`生成，而不是手写。
 
 #### 从v3更新
-- 更新`stackbricks-gradle-plugin`至2.3.0及以上，[Stackbricks](https://github.com/aquamarine5/Stackbricks)更新至2.4.22及以上。
-- 单数`downloadUrl`被复数`possibleDownloadPath`替代。单源用户改用`uploadDestinationConfiguration { qiniuUploadConfig { } }`即可，
+- 更新`stackbricks-gradle-plugin`至3.0.0-rc1及以上，[Stackbricks](https://github.com/aquamarine5/Stackbricks)更新至3.0.0-rc1及以上。
+- 单数`downloadUrl`被复数`possibleDownloadPath`替代，但`downloadUrl`会继续保留以兼容旧版应用。
+- 单源用户改用`uploadDestinationConfigurations { qiniuUploadConfig { } }`即可，
   `possibleDownloadPath`里只会有一项，`additionalInformation.host`会填入`host`。
 - Stackbricks仍然接受`manifestVersion`为2和3的清单，其中`downloadUrl`作为legacy回退。
-- 配置多个目标时，`possibleConfigurationPaths`里相同`configFilePath`只生成一份清单文件，
-  但该文件会被上传到**每一个**目标，因此每个目标都能独立提供清单。
+- 若`latestStable`或`latestTest`里存在已从`uploadDestinationConfigurations`移除的authority，
+  插件会在写回时用同一个文件名重新指向当前已配置的目标，并打印告警。
 
 ### v3 (`stackbricks_manifest.json`或`stackbricks_manifest_v3.json`)
 ```json5

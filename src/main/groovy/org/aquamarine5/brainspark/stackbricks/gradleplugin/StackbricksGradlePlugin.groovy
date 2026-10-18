@@ -30,7 +30,7 @@ class StackbricksGradlePlugin implements Plugin<Project> {
                 if (destinations.isEmpty()) {
                     throw new IllegalStateException(
                             "No upload destination is configured. Declare one inside " +
-                                    "stackbricksConfig { uploadDestinationConfiguration { ... } }")
+                                    "stackbricksConfig { uploadDestinationConfigurations { ... } }")
                 }
                 def apkFile = project.layout.buildDirectory
                         .file("outputs/apk/release/app-release.apk").get().asFile
@@ -52,7 +52,9 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         project.tasks.register("uploadApkByQiniu") {
             it.group = "stackbricks"
             it.description = "Uploads the release APK to Qiniu only"
-            it.deprecated = "Use the uploadApk task with uploadDestinationConfiguration instead"
+            project.logger.warn(
+                    "The uploadApkByQiniu task is deprecated and will be removed. " +
+                            "Use the uploadApk task with uploadDestinationConfigurations instead.")
             it.dependsOn "assembleRelease"
             it.doLast {
                 def config = requireConfig(project)
@@ -165,12 +167,13 @@ class StackbricksGradlePlugin implements Plugin<Project> {
         )
 
         def json = fetchPreviousManifest(manifestDestinations)
-        if (json == null) {
+        def isFreshManifest = json == null
+        if (isFreshManifest) {
             println "[uploadApk] No previous manifest found, creating a new one."
             json = new JSONObject()
         }
         json.put("latestTest", versionData)
-        if (isStableRelease) {
+        if (isStableRelease || isFreshManifest) {
             json.put("latestStable", versionData)
         }
         json.put("manifestVersion", LATEST_MANIFEST_VERSION)
@@ -195,7 +198,7 @@ class StackbricksGradlePlugin implements Plugin<Project> {
                 throw new IllegalStateException(
                         "No upload destination registered for authority ${manifestDestination.authority}, " +
                                 "required by manifest destination ${manifestDestination.manifestUrl}. " +
-                                "Declare it inside stackbricksConfig { uploadDestinationConfiguration { ... } }. " +
+                                "Declare it inside stackbricksConfig { uploadDestinationConfigurations { ... } }. " +
                                 "If this manifest destination came from the deprecated possibleConfigurationPaths, " +
                                 "which always migrates to a Qiniu manifest destination, either add a qiniuUploadConfig " +
                                 "or delete possibleConfigurationPaths and declare manifestDestinationConfigurations " +
