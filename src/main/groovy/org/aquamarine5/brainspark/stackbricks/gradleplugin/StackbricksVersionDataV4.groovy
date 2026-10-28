@@ -1,14 +1,12 @@
 package org.aquamarine5.brainspark.stackbricks.gradleplugin
 
-/**
- * StackbricksVersionDataV2
- *
- * This class represents the newest version data for Stackbricks.
- */
-class StackbricksVersionDataV3 {
+import com.alibaba.fastjson2.JSONObject
+
+class StackbricksVersionDataV4 {
     String packageName
     int versionCode
     String versionName
+    List<JSONObject> possibleDownloadPath
     String downloadUrl
     Long releaseDate
     String changelog
@@ -16,10 +14,10 @@ class StackbricksVersionDataV3 {
     boolean forceInstall
     long forceInstallLessVersion
 
-    StackbricksVersionDataV3(String packageName,
+    StackbricksVersionDataV4(String packageName,
                              int versionCode,
                              String versionName,
-                             String downloadFilename,
+                             List<JSONObject> possibleDownloadPath,
                              Long releaseDate,
                              String changelog,
                              boolean forceInstall,
@@ -27,10 +25,17 @@ class StackbricksVersionDataV3 {
         this.packageName = packageName
         this.versionCode = versionCode
         this.versionName = versionName
-        this.downloadUrl = downloadFilename
+        this.possibleDownloadPath = possibleDownloadPath
+        this.downloadUrl = resolveLegacyDownloadUrl(possibleDownloadPath)
         this.releaseDate = releaseDate
         this.changelog = changelog
         this.forceInstall = forceInstall
         this.forceInstallLessVersion = forceInstallLessVersion
+    }
+
+    static String resolveLegacyDownloadUrl(List<JSONObject> possibleDownloadPath) {
+        return possibleDownloadPath?.find {
+            it.getString("authority") == QiniuUploader.AUTHORITY
+        }?.getString("filename")
     }
 }
