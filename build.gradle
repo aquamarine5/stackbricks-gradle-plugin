@@ -42,11 +42,11 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.squareup.okhttp3:okhttp:5.4.0'
-    implementation 'com.alibaba.fastjson2:fastjson2:2.0.63'
-    implementation 'com.squareup.okio:okio:3.18.1'
+    implementation 'com.squareup.okhttp3:okhttp:5.5.1'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.66'
+    implementation 'com.squareup.okio:okio:3.18.2'
     implementation 'com.qiniu:qiniu-java-sdk:7.19.0'
-    implementation 'software.amazon.awssdk:s3:2.56.0'
+    implementation 'software.amazon.awssdk:s3:2.57.4'
     implementation gradleApi()
     implementation localGroovy()
 }
